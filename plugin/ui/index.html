@@ -1,0 +1,98 @@
+<div class="stats-layout" x-data="statsPlugin()">
+    <div class="stats-section">
+        <div class="stats-section-header">Overview</div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" x-text="overview.conversations"></div>
+                <div class="stat-label">Conversations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" x-text="overview.notes"></div>
+                <div class="stat-label">Notes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" x-text="overview.people"></div>
+                <div class="stat-label">People</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" x-text="overview.facts"></div>
+                <div class="stat-label">Facts</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-section">
+        <div class="stats-section-header">Token Usage &middot; 7 days</div>
+        <div class="stats-chart-wrap">
+            <canvas id="tokenChart"></canvas>
+            <div class="stats-chart-empty" x-show="!tokenData.daily || tokenData.daily.length === 0">No token usage recorded yet</div>
+        </div>
+        <div class="stats-totals">
+            <div class="stats-total-item">
+                <span class="stats-total-label">Prompt</span>
+                <span class="stats-total-value" x-text="tokenTotals.prompt.toLocaleString()"></span>
+            </div>
+            <div class="stats-total-item">
+                <span class="stats-total-label">Completion</span>
+                <span class="stats-total-value" x-text="tokenTotals.completion.toLocaleString()"></span>
+            </div>
+            <div class="stats-total-item">
+                <span class="stats-total-label">Total</span>
+                <span class="stats-total-value stats-total-highlight" x-text="tokenTotals.total.toLocaleString()"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-section">
+        <div class="stats-section-header">Resources</div>
+        <div class="stats-resource-meta">
+            <div class="stats-meta-item">
+                <span class="stats-meta-label">Vault Total</span>
+                <span class="stats-meta-value" x-text="formatBytes(resources.vault_size_bytes)"></span>
+            </div>
+            <div class="stats-meta-item">
+                <span class="stats-meta-label">Database</span>
+                <span class="stats-meta-value" x-text="formatBytes(resources.db_size_bytes)"></span>
+            </div>
+        </div>
+        <div class="stats-resource-grid">
+            <template x-for="folder in folderSizes" :key="folder.name">
+                <div class="stats-resource-item">
+                    <div class="stats-resource-label">
+                        <span x-text="folder.name"></span>
+                        <span class="stats-resource-size" x-text="formatBytes(folder.size)"></span>
+                    </div>
+                    <div class="stats-resource-track">
+                        <div class="stats-resource-fill" :style="`width: ${folderPct(folder.size)}%`"></div>
+                    </div>
+                </div>
+            </template>
+        </div>
+        <div class="stats-table-grid">
+            <template x-for="t in tableCounts" :key="t.name">
+                <div class="stats-table-item">
+                    <span class="stats-table-name" x-text="t.name"></span>
+                    <span class="stats-table-count" x-text="t.count.toLocaleString()"></span>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <div class="stats-section">
+        <div class="stats-section-header">Latency &middot; 7 days</div>
+        <div class="latency-grid">
+            <template x-for="l in latencyList" :key="l.plugin">
+                <div class="latency-card">
+                    <div class="latency-plugin" x-text="l.plugin"></div>
+                    <div class="latency-avg" x-text="l.avg_ms + ' ms'"></div>
+                    <div class="latency-range">
+                        <span class="latency-range-label">range</span>
+                        <span x-text="l.min_ms + '\u2013' + l.max_ms + ' ms'"></span>
+                    </div>
+                    <div class="latency-count" x-text="l.count + ' calls'"></div>
+                </div>
+            </template>
+            <div class="latency-empty" x-show="latencyList.length === 0">No latency data yet</div>
+        </div>
+    </div>
+</div>
