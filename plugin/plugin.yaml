@@ -1,5 +1,5 @@
 name: stats
-version: 0.1.0
+version: 0.2.0
 description: Conversation, notes, people, and facts counts
 author: AnotherMe
 entrypoint: plugin
@@ -9,6 +9,9 @@ capabilities:
   - events
 dependencies:
   - memory
+soft_dependencies:
+  - name: chat
+    enables: "conversation count in stats"
 ui:
   tab: Stats
   icon: stats
