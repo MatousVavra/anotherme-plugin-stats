@@ -2,43 +2,55 @@
     <div class="stats-section">
         <div class="stats-section-header">Overview</div>
         <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-value" x-text="overview.conversations"></div>
+            <div class="stat-card clickable" @click="goTo('chat')">
+                <div class="stat-skeleton" x-show="overview === null"></div>
+                <div class="stat-value" x-show="overview !== null" x-text="fmtNum(overviewValue('conversations'))"></div>
                 <div class="stat-label">Conversations</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" x-text="overview.notes"></div>
+            <div class="stat-card clickable" @click="goTo('notes')">
+                <div class="stat-skeleton" x-show="overview === null"></div>
+                <div class="stat-value" x-show="overview !== null" x-text="fmtNum(overviewValue('notes'))"></div>
                 <div class="stat-label">Notes</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" x-text="overview.people"></div>
+            <div class="stat-card clickable" @click="goTo('memory')">
+                <div class="stat-skeleton" x-show="overview === null"></div>
+                <div class="stat-value" x-show="overview !== null" x-text="fmtNum(overviewValue('people'))"></div>
                 <div class="stat-label">People</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" x-text="overview.facts"></div>
+            <div class="stat-card clickable" @click="goTo('memory')">
+                <div class="stat-skeleton" x-show="overview === null"></div>
+                <div class="stat-value" x-show="overview !== null" x-text="fmtNum(overviewValue('facts'))"></div>
                 <div class="stat-label">Facts</div>
             </div>
         </div>
     </div>
 
     <div class="stats-section">
-        <div class="stats-section-header">Token Usage &middot; 7 days</div>
+        <div class="stats-section-header-row">
+            <div class="stats-section-header" x-text="'Token Usage &middot; ' + (tokenPeriod === '7d' ? '7' : '30') + ' days'"></div>
+            <div class="stats-chips">
+                <button class="stats-chip" :class="{ active: tokenPeriod === '7d' }" @click="setPeriod('7d')">7d</button>
+                <button class="stats-chip" :class="{ active: tokenPeriod === '30d' }" @click="setPeriod('30d')">30d</button>
+            </div>
+        </div>
         <div class="stats-chart-wrap">
-            <canvas id="tokenChart"></canvas>
-            <div class="stats-chart-empty" x-show="!tokenData.daily || tokenData.daily.length === 0">No token usage recorded yet</div>
+            <canvas id="tokenChart" x-show="chartState === 'ready'"></canvas>
+            <div class="stats-chart-empty" x-show="chartState === 'loading'">Loading chart&hellip;</div>
+            <div class="stats-chart-empty" x-show="chartState === 'unavailable'">Chart unavailable (offline?)</div>
+            <div class="stats-chart-empty" x-show="chartState === 'empty'">No token usage recorded yet</div>
         </div>
         <div class="stats-totals">
             <div class="stats-total-item">
                 <span class="stats-total-label">Prompt</span>
-                <span class="stats-total-value" x-text="tokenTotals.prompt.toLocaleString()"></span>
+                <span class="stats-total-value" x-text="fmtNum(tokenTotals ? tokenTotals.prompt : null)"></span>
             </div>
             <div class="stats-total-item">
                 <span class="stats-total-label">Completion</span>
-                <span class="stats-total-value" x-text="tokenTotals.completion.toLocaleString()"></span>
+                <span class="stats-total-value" x-text="fmtNum(tokenTotals ? tokenTotals.completion : null)"></span>
             </div>
             <div class="stats-total-item">
                 <span class="stats-total-label">Total</span>
-                <span class="stats-total-value stats-total-highlight" x-text="tokenTotals.total.toLocaleString()"></span>
+                <span class="stats-total-value stats-total-highlight" x-text="fmtNum(tokenTotals ? tokenTotals.total : null)"></span>
             </div>
         </div>
     </div>
@@ -48,11 +60,11 @@
         <div class="stats-resource-meta">
             <div class="stats-meta-item">
                 <span class="stats-meta-label">Vault Total</span>
-                <span class="stats-meta-value" x-text="formatBytes(resources.vault_size_bytes)"></span>
+                <span class="stats-meta-value" x-text="formatBytes(resources ? resources.vault_size_bytes : null)"></span>
             </div>
             <div class="stats-meta-item">
                 <span class="stats-meta-label">Database</span>
-                <span class="stats-meta-value" x-text="formatBytes(resources.db_size_bytes)"></span>
+                <span class="stats-meta-value" x-text="formatBytes(resources ? resources.db_size_bytes : null)"></span>
             </div>
         </div>
         <div class="stats-resource-grid">

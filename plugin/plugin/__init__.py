@@ -1,5 +1,7 @@
 import asyncio
+import os
 import sqlite3
+from typing import Literal
 
 from fastapi import APIRouter
 
@@ -31,7 +33,7 @@ class Plugin:
             return await asyncio.to_thread(self._build_stats, vn)
 
         @router.get("/tokens")
-        async def token_stats(period: str = "7d"):
+        async def token_stats(period: Literal["7d", "30d"] = "7d"):
             return await asyncio.to_thread(self._build_token_stats, period)
 
         @router.get("/resources")
@@ -62,7 +64,7 @@ class Plugin:
 
     def _build_token_stats(self, period: str) -> dict:
         conn = self._db.get_db()
-        days = 7 if period == "7d" else 30 if period == "30d" else 7
+        days = {"7d": 7, "30d": 30}[period]
         rows = conn.execute(
             """SELECT DATE(timestamp) as date, plugin,
                       SUM(prompt_tokens) as prompt_tokens,
@@ -77,7 +79,6 @@ class Plugin:
         return {"daily": [dict(r) for r in rows]}
 
     def _build_resource_stats(self, vault_name: str) -> dict:
-        import os as _os
         conn = self._db.get_db()
         vault_path = self._vault.vault_path(vault_name)
         vault_size = 0
@@ -90,8 +91,8 @@ class Plugin:
                 vault_size += size
             else:
                 folder_sizes[folder] = 0
-        db_path = _os.environ.get("DB_PATH", "/data/anotherme.db")
-        db_size = _os.path.getsize(db_path) if _os.path.exists(db_path) else 0
+        db_path = self._ctx.get_env("DB_PATH", "/data/anotherme.db")
+        db_size = os.path.getsize(db_path) if os.path.exists(db_path) else 0
         table_counts = {}
         tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
         for t in tables:
