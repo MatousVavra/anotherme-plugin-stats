@@ -25,3 +25,4 @@ settings:
     max: 300
     step: 5
     description: "How often to refresh stats"
+tables: []
